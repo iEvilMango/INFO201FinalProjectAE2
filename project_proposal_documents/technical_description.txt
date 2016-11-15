@@ -1,0 +1,17 @@
+What will be the format of your final product?
+A: Shiny app.
+
+How will you be reading in your data?
+A: static .csv file.
+
+What types of data-wrangling will you do?
+A: Reformatting, pulling out specific columns and rows to add to interactive graphics. 
+
+What libraries will be used?
+A:
+
+What will you be answering with statistical analysis/machine learning?
+A:
+
+What major challenges do you anticipate?
+A: Building graphics or doing analysis that doesn't make sense with our data set.

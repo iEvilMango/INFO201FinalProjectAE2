@@ -1,5 +1,7 @@
 What is the dataset you'll be working with?
-A: We will be working primarily with the musicbrainz and lyricsweb data sets. We will also interact with spotify/youtube apis.
+A: We will be working primarily with the musicbrainz and MLDb (Music Lyrics Database) data sets. We will also interact with spotify/youtube apis. We will be creating a search engine that will search the dataset for matching meta data (artist, album, track, etc). The interaction will be done via XML. We will use the musicbrainz database for song metadata, and MLDb for lyrics, and more song metadata.
+Links: http://www.programmableweb.com/api/musicbrainz
+       http://www.mldb.org/
 
 Who is your target audience?
 A: Our target audience is people who are interested in finding music or song lyrics.

@@ -1,17 +1,17 @@
 What will be the format of your final product?
-A: Shiny app.
+A: Shiny app, with audio and video output
 
 How will you be reading in your data?
-A: static .csv file.
+A: "Lyricsfly" and "MusicBrainz" APIs for getting data about songs to display at the bottom, as well as Spotify and YouTube to get the song itself and a music video if possible for it.
 
 What types of data-wrangling will you do?
-A: Reformatting, pulling out specific columns and rows to add to interactive graphics. 
+A: getting data about song for output, obtaining youtube video and possibly spotify audio of song. Matching user with random songs fitting their criteria (genre, etc)
 
 What libraries will be used?
-A:
+A: "audio" to play song from spotify (as much as possible; might have to give up on spotify if they won't play the entire song and just use youtube), Shiny, JSONlite, potentially a video library / maybe just embedded html in shiny.
 
 What will you be answering with statistical analysis/machine learning?
-A:
+A: Finding songs that match all criteria, maybe machine learning to associate matches in better ways?
 
 What major challenges do you anticipate?
-A: Building graphics or doing analysis that doesn't make sense with our data set.
+A: Building graphics or doing analysis that doesn't make sense with our data set. Spotify's API being weird to work with. Combining all the data into one page correctly (i.e. working with shiny)

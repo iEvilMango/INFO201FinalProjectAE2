@@ -1,5 +1,5 @@
 What is the dataset you'll be working with?
-A: We will be working primarily with the musicbrainz and lyric wikia data sets. We will also interact with spotify/youtube apis. We will be creating a search engine that will search the dataset for matching meta data (artist, album, track, etc). The interaction will be done via XML. We will use the musicbrainz database for song metadata, and lyric wikia for lyrics and more song metadata.
+A: We will be working primarily with the musicbrainz and lyric wikia data sets. We will also interact with spotify/youtube apis. We will be creating a search engine that will search the dataset for matching meta data (artist, album, track, etc). The interaction will be done via XML. We will use the musicbrainz database for song metadata, and lyric wikia for lyrics and more song metadata. All of our data is user-submitted from the web. There is a definite potential for errors in the data, so some of our search functionality may not be as accurate as we would like.
 Links: http://www.programmableweb.com/api/musicbrainz
        http://lyrics.wikia.com/wiki/Lyrics_Wiki
        http://www.programmableweb.com/api/lyricwiki

@@ -1,8 +1,10 @@
 What is the dataset you'll be working with?
-A:
+A: We will be working primarily with the musicbrainz and lyricsweb data sets. We will also interact with spotify/youtube apis.
 
 Who is your target audience?
-A:
+A: Our target audience is people who are interested in finding music or song lyrics.
 
 What does your audience want to learn from your data? List 3 questions.
-A:
+A: 1. What music matches these keywords?
+2. What are the lyrics to this song?
+3. What songs are similar to this song?

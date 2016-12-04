@@ -17,29 +17,25 @@ shinyServer(
     })
     
     output$lyrics <- renderUI({
-      lyrics = "Is she worth it, whatever this is?
-              It doesn’t feel right.
-      Better think about your kids.
-      I’m not putting up a fight.
-      'Cause we could make love tonight,
-      But you’re gonna hate yourself in the morning light,
-      So just stop, breathe, count to three,
-      Get your head right, right.
-      I put the I in lie
-      'Cause I’m a cheat, cheat, cheat
-      I’m a cheat, cheat, cheat.
-      And baby, bang bang, kiss kiss
-      You and I got to put an end to this
-      So we cheat, cheat, cheat
-      I’m a cheat, cheat, cheat.
-      If you’re unfaithful, put your hands in the air,
-      Hands in the air, hands in the air,
-      Like you’re under arrest with a guilty conscience
-      Stick ‘em up if you’ve got a guilty conscience, yeah
-      Yeah, yeah
-      She married… "
-      
-      return()
+      lyrics = c("Is she worth it, whatever this is",
+              "It doesn’t feel right.",
+              "Better think about your kids.",
+              "I’m not putting up a fight.",
+              "'Cause we could make love tonight,",
+              "But you’re gonna hate yourself in the morning light,",
+              "So just stop, breathe, count to three,",
+              "Get your head right, right.",
+              "I put the I in lie",
+              "'Cause I’m a cheat, cheat, cheat"
+              )
+      block <- tags$blockquote()
+      for (i in lyrics) {
+        print(i)
+        block <- tagAppendChild(block, i)
+        block <- tagAppendChild(block, tags$br())
+        print(block)
+      }
+      return(block)
     })
     
     

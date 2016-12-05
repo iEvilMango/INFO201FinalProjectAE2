@@ -1,9 +1,10 @@
 library(shiny)
 
-getYoutube <- function(link) {
-  if(link != "") {
-    link = paste0('<iframe width="500" height="250" src="//', link,
-           '" frameborder="0" allowfullscreen></iframe>')
+getYoutube <- function(youtubeID) {
+  if(youtubeID != "") {
+    link = paste0('<iframe width="500" height="250" src="//www.youtube.com/embed/',
+                  youtubeID,
+                  '" frameborder="0" allowfullscreen></iframe>')
   } else {
     link = "No Video passed"
   }
@@ -13,6 +14,7 @@ getYoutube <- function(link) {
 shinyServer(
   function(input, output) {
     output$youtube <- renderUI({
+      # Modify to get video id and pass that in.
       HTML(getYoutube(input$youtube))
     })
     
@@ -28,16 +30,14 @@ shinyServer(
               "I put the I in lie",
               "'Cause I’m a cheat, cheat, cheat"
               )
+      # Replace lyrics above ^ with a vector containing the actual
+      # song lyrics when possible. 
       block <- tags$blockquote()
       for (i in lyrics) {
-        print(i)
         block <- tagAppendChild(block, i)
         block <- tagAppendChild(block, tags$br())
-        print(block)
       }
       return(block)
     })
-    
-    
   } ## End of server function
 )

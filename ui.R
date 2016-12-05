@@ -7,9 +7,11 @@ library(shiny)
 shinyUI(
   fluidPage(
     sidebarPanel(
+      # Disable this one on final product. Or leave it enabled and do cool stuff.
+      # either way. 
       textInput(inputId = 'youtube',
                 label = "Youtube link",
-                value = "www.youtube.com/embed/bbPaI_OQBUA"
+                value = "bbPaI_OQBUA"
                 ),
       
       textInput(inputId = 'title',

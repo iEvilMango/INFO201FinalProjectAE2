@@ -1,5 +1,6 @@
 library(jsonlite)
 library(dplyr)
+require(curl)
 
 # Example requests:
 # data <- APIRequest("track", "Sultans of Swing", "Dire Straits")
@@ -29,7 +30,8 @@ SendAPIRequest <- function(type, request, num.results){
   api.root = 'http://api.musixmatch.com/ws/1.1/'
   api.key = 'apikey=6e94e896d4f21b051076e5bb8679c724'
   page.size = paste0('&page_size=',num.results)
-  final.request <- paste0(api.root,type,api.key,request,page.size)
+  has.lyrics="&f_has_lyrics=1"
+  final.request <- paste0(api.root,type,api.key,request,page.size,has.lyrics)
   print(final.request)
   return(fromJSON(final.request))
 }
@@ -39,7 +41,7 @@ SendAPIRequest <- function(type, request, num.results){
 # song.name: the name of the song (blank if there is no name).
 # artist.name: the name of the artist (blank if there is no artist).
 # num.results: the number of results to return. The default (if left blank) is 10.
-APIRequest <- function(query.type, song.name, artist.name, num.results=10){
+APIRequest <- function(query.type, song.name, artist.name, num.results=1){
   song.name = trimws(song.name)
   artist.name = trimws(artist.name)
   if(query.type == 'track'){
@@ -53,6 +55,60 @@ APIRequest <- function(query.type, song.name, artist.name, num.results=10){
   query = paste0(search.type, SwapSpaces(search))
   return(SendAPIRequest(type, query, num.results))
 }
+
+# Internal method for reducing redundancy.
+# Checks if the given name is an empty string. If it is not empty, formats it and appends the given add to it.
+# If name is equal to "", returns ""
+LyricCheckHelper <- function(name, add){
+  name.part = ""
+  if(name != ""){
+    formatted = SwapSpaces(name)
+    name.part <- paste0(add,formatted)
+  }
+  return(name.part)
+}
+
+# Gets the lyrics for the specified song.
+# If an artist name is given, will use the song by the artist
+# Otherwise, uses first hit
+# Parameters:
+#   song.name: The name of the song. (e.g. "Sultans Of Swing")
+#   artist.name (optional): The name of the artist. (e.g. "Dire Straits"). If no artist is given, will use the top hit.
+# Returns:
+#   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
+GetLyrics <- function(song.name, artist.name=""){
+  song.search <- LyricCheckHelper(song.name, "&q_track=")
+  artist.search <- LyricCheckHelper(artist.name, "&q_artist=")
+  full.search <- paste0(song.search, artist.search)
+  data <- SendAPIRequest("track.search?", full.search, 1)
+  track.id <-  data$message$body$track_list$track$track_id
+  track.artist <- SwapSpaces(data$message$body$track_list$track$artist_name)
+  lyrics.search <- paste0("&track_id=",track.id)
+  lyric.data <- SendAPIRequest("track.lyrics.get?",lyrics.search,1)
+  lyrics <- lyric.data$message$body$lyrics$lyrics_body
+  return(lyrics)
+}
+
+# Gets the url for a youtube video from the keyword given
+# Parameter:
+#   video.search: the search query
+# Return:
+#   The id of the video on youtube
+GetYouTubeVideoID <- function(video.search){
+  api.key = 'AIzaSyC5B_muf0KvmTYaGKAsOm0VHQ-VpTGIZik'
+  base.url = 'https://www.googleapis.com/youtube/v3'
+  formatted.video.search = SwapSpaces(video.search)
+  search = paste0(base.url,"/search?part=snippet&q=",formatted.video.search,"&type=video&key=",api.key)
+  data <- fromJSON(search)
+  video.id <- data$items$id$videoId[[1]]
+  return(video.id)
+}
+
+# Exampole url:
+# https://www.youtube.com/watch?v=G2tWhjEbfSQ
+# base = https://www.youtube.com/watch?
+# v= (Video equals)
+# G2tWhjEbfSQ video id
 
 
 

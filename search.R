@@ -77,16 +77,40 @@ LyricCheckHelper <- function(name, add){
 # Returns:
 #   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
 GetLyrics <- function(song.name, artist.name=""){
+  data <- GetSongData(song.name, artist.name)
+  track.id <-  data$message$body$track_list$track$track_id
+  return(GetLyricsData(track.id))
+}
+
+# Internal method for getting song data
+# Paramter:
+#   song.name: The name of the song. (e.g. "Sultans Of Swing")
+#   artist.name (optional): The name of the artist. (e.g. "Dire Straits"). If no artist is given, will use the top hit.
+# Returns:
+#   List of information. Useful values:
+#     $track_length: Gives the length of the track (in seconds)
+#     $album_name: Gives the album name of the track
+#     $first_release_date: Gives the first release data (year-month-dayThour:minute:second)
+#     $primary_genres: Gives the genres of the music, in the form of a list.
+#         
+GetSongData <- function(song.name, artist.name=""){
   song.search <- LyricCheckHelper(song.name, "&q_track=")
   artist.search <- LyricCheckHelper(artist.name, "&q_artist=")
   full.search <- paste0(song.search, artist.search)
   data <- SendAPIRequest("track.search?", full.search, 1)
-  track.id <-  data$message$body$track_list$track$track_id
-  track.artist <- SwapSpaces(data$message$body$track_list$track$artist_name)
+  filtered.data <- data$message$body$track_list$track
+  return(filtered.data)
+}
+
+# Internal method for getting lyric data
+# Paramter:
+#   track.id: the musixmatch id of the track
+# Returns:
+#   Character array of the lyrics
+GetLyricsData <- function(track.id){
   lyrics.search <- paste0("&track_id=",track.id)
   lyric.data <- SendAPIRequest("track.lyrics.get?",lyrics.search,1)
-  lyrics <- lyric.data$message$body$lyrics$lyrics_body
-  return(lyrics)
+  return(lyric.data$message$body$lyrics$lyrics_body)
 }
 
 # Gets the url for a youtube video from the keyword given

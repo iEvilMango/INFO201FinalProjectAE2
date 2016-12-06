@@ -10,10 +10,10 @@ shinyUI(
     sidebarPanel(
       # Disable this one on final product. Or leave it enabled and do cool stuff.
       # either way. 
-      textInput(inputId = 'youtube',
-                label = "Youtube link",
-                value = "bbPaI_OQBUA"
-                ),
+      #textInput(inputId = 'youtube',
+      #          label = "Youtube link",
+      #          value = "bbPaI_OQBUA"
+      #          ),
       
       textInput(inputId = 'title',
                    label = "Title of Song"
@@ -37,7 +37,7 @@ shinyUI(
     
     # Right panel with meta data
     sidebarPanel(
-      h2("Meta Data"),
+      uiOutput("meta"),
       width = 3
     )
   )

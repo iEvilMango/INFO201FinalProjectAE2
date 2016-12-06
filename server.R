@@ -1,4 +1,5 @@
 library(shiny)
+source("search.R")
 
 getYoutube <- function(youtubeID) {
   if(youtubeID != "") {
@@ -15,25 +16,64 @@ shinyServer(
   function(input, output) {
     output$youtube <- renderUI({
       # Modify to get video id and pass that in.
-      HTML(getYoutube(input$youtube))
+      HTML(
+        getYoutube(
+          GetYouTubeVideoID(
+            paste0(
+              input$title,
+              input$artist
+            )
+          )
+        )
+      )
+    })
+    
+    output$meta <- renderUI({
+      # Genre 
+      output <- tags$div()
+      data <- GetParsedData(
+        GetSongData(input$title, input$artist)
+      )
+      first.release <- data$first_release_date
+      first.release <- format(as.Date(first.release), format="%B %d, %Y")
+      
+      date <- tags$p(paste0("Released: ", first.release))
+      
+      genre <- data$genre
+      
+      artist <- data$artist_name
+      popularity <- data$track_rating
+    
+      output <- tagAppendChild(output, date)
+      
+      output <- tagAppendChild(output, 
+                      tags$p(
+                        paste("Artist:", artist)
+                      )
+                    )
+      
+      output <- tagAppendChild(output, 
+                                tags$p(
+                                  paste("Genre:", genre)
+                                )
+                             )
+      
+      output <- tagAppendChild(output, 
+                                tags$p(
+                                  paste("Popularity rating (out of 100):", popularity)
+                                )
+                              )
+      return(output)
     })
     
     output$lyrics <- renderUI({
-      lyrics = c("Is she worth it, whatever this is",
-              "It doesn’t feel right.",
-              "Better think about your kids.",
-              "I’m not putting up a fight.",
-              "'Cause we could make love tonight,",
-              "But you’re gonna hate yourself in the morning light,",
-              "So just stop, breathe, count to three,",
-              "Get your head right, right.",
-              "I put the I in lie",
-              "'Cause I’m a cheat, cheat, cheat"
-              )
-      # Replace lyrics above ^ with a vector containing the actual
-      # song lyrics when possible. 
+      
+      lyrics <- GetLyrics(input$title, input$artist)
+      
+      lyrics = strsplit(lyrics, "\n")
       block <- tags$blockquote()
-      for (i in lyrics) {
+      
+      for (i in lyrics[[1]]) {
         block <- tagAppendChild(block, i)
         block <- tagAppendChild(block, tags$br())
       }

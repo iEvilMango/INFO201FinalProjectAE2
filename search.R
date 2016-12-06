@@ -143,7 +143,7 @@ GetParsedData <- function(filtered.data){
                   mutate("genre" = tryCatch(
                           {
                             return(as.data.frame(filtered.data$primary_genres$music_genre_list)
-                                                  $music_genre$music_genre_name)
+                                                  $music_genre$music_genre_name[1])
                           },
                           error = function(e){
                             return("Not found")

@@ -135,6 +135,19 @@ GetYouTubeVideoID <- function(video.search){
 # G2tWhjEbfSQ video id
 
 
+# Takes a data frame created by the GetSongData function and returns a dataframe with
+# Released Date / Artist / Album Image URL / Popularity (from 0 - 100 in musixmatch) / Genre 
+GetParsedData <- function(filtered.data){
+  parsed.data <- filtered.data %>% 
+                  select(first_release_date,
+                         artist_name,
+                         album_coverart_100x100,
+                         track_rating
+                        ) %>%
+                  mutate("genre" = as.data.frame(filtered.data$primary_genres$music_genre_list)
+                                                $music_genre$music_genre_name)
+  return(parsed.data)
+}
 
 
 

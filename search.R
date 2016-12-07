@@ -1,6 +1,7 @@
 library(jsonlite)
 library(dplyr)
-require(XML)
+library(XML)
+library(curl)
 
 # Example requests:
 # data <- APIRequest("track", "Sultans of Swing", "Dire Straits")
@@ -28,7 +29,6 @@ SendAPIRequest <- function(type, request, num.results){
   page.size = paste0('&page_size=',num.results)
   has.lyrics="&f_has_lyrics=1"
   final.request <- paste0(api.root,type,api.key,request,page.size,has.lyrics)
-  print(final.request)
   return(fromJSON(final.request))
 }
 
@@ -36,7 +36,7 @@ SendAPIRequest <- function(type, request, num.results){
 # query.type: the type of query that is being done (e.g. 'track', 'artist).
 # song.name: the name of the song (blank if there is no name).
 # artist.name: the name of the artist (blank if there is no artist).
-# num.results: the number of results to return. The default (if left blank) is 10.
+# num.results: the number of results to return. The default (if left blank) is 1.
 APIRequest <- function(query.type, song.name, artist.name, num.results=1){
   song.name = trimws(song.name)
   artist.name = trimws(artist.name)
@@ -81,8 +81,8 @@ GetLyrics <- function(song.name, song.artist){
     artist.name <- GetSongData(song.name)$artist_name
   }
   artist = LyricCheckHelper(artist.name, "artist=")
-  search <- paste0(search.lyric,artist,"&",song)
-  print(search)
+  search <- paste0(search.lyric, artist, "&", song)
+
   data <- xmlToList(xmlTreeParse(search))
   lyric.id = data$SearchLyricResult$LyricId
   checksum  = data$SearchLyricResult$LyricChecksum
@@ -90,19 +90,18 @@ GetLyrics <- function(song.name, song.artist){
   search.id = LyricCheckHelper(lyric.id, "lyricId=")
   search.sum = LyricCheckHelper(checksum, "lyricCheckSum=")
   full.search = paste0(search.words,search.id,"&",search.sum)
-  print(full.search)
+  
   full.lyrics = xmlToList(xmlTreeParse(full.search))
   return(full.lyrics$Lyric)
 }
 
 LyricHelperInternal <- function(song.name){
   base = 'http://api.chartlyrics.com/apiv1.asmx/'
-  search.lyric = paste0(base,'SearchLyric?')
-  song = LyricCheckHelper(song.name,"song=")
+  search.lyric = paste0(base, 'SearchLyric?')
+  song = LyricCheckHelper(song.name, "song=")
   artist.name <- GetSongData(song.name)$artist_name
   artist = LyricCheckHelper(artist.name, "artist=")
-  search <- paste0(search.lyric,artist,"&",song)
-  print(search)
+  search <- paste0(search.lyric,artist, "&", song)
   data <- xmlToList(xmlTreeParse(search))
   return(data)
 }
@@ -122,7 +121,11 @@ GetSongData <- function(song.name, artist.name=""){
   song.search <- LyricCheckHelper(song.name, "&q_track=")
   artist.search <- LyricCheckHelper(artist.name, "&q_artist=")
   full.search <- paste0(song.search, artist.search)
-  data <- SendAPIRequest("track.search?", full.search, 1)
+  data <- SendAPIRequest(
+              "track.search?",
+              full.search,
+              1
+            )
   filtered.data <- data$message$body$track_list$track
   return(filtered.data)
 }
@@ -134,7 +137,11 @@ GetSongData <- function(song.name, artist.name=""){
 #   Character array of the lyrics
 GetLyricsData <- function(track.id){
   lyrics.search <- paste0("&track_id=",track.id)
-  lyric.data <- SendAPIRequest("track.lyrics.get?",lyrics.search,1)
+  lyric.data <- SendAPIRequest(
+                    "track.lyrics.get?",
+                    lyrics.search,
+                    1
+                  )
   return(lyric.data$message$body$lyrics$lyrics_body)
 }
 
@@ -147,18 +154,16 @@ GetYouTubeVideoID <- function(video.search){
   api.key = 'AIzaSyC5B_muf0KvmTYaGKAsOm0VHQ-VpTGIZik'
   base.url = 'https://www.googleapis.com/youtube/v3'
   formatted.video.search = SwapSpaces(video.search)
-  search = paste0(base.url,"/search?part=snippet&q=",formatted.video.search,"&type=video&key=",api.key)
+  
+  search = paste0(base.url,
+                  "/search?part=snippet&q=",
+                  formatted.video.search,
+                  "&type=video&key=",
+                  api.key)
   data <- fromJSON(search)
   video.id <- data$items$id$videoId[[1]]
   return(video.id)
 }
-
-# Exampole url:
-# https://www.youtube.com/watch?v=G2tWhjEbfSQ
-# base = https://www.youtube.com/watch?
-# v= (Video equals)
-# G2tWhjEbfSQ video id
-
 
 # Takes a data frame created by the GetSongData function and returns a dataframe with
 # Released Date / Artist / Album Image URL / Popularity (from 0 - 100 in musixmatch) / Genre 
@@ -169,22 +174,16 @@ GetParsedData <- function(filtered.data){
                          album_coverart_100x100,
                          track_rating
                         ) 
+  
   genre = as.data.frame(filtered.data$primary_genres$music_genre_list)$music_genre$music_genre_name[1]
+  
+  # Error checking; if the obtained genre is meaningless, we can say it's not found.
   if(typeof(genre) != "character" || genre == "") {
     genre = "not found"
   }
-  parsed.data <- parsed.data %>%
-                  mutate("genre" = genre)
   
-  #%>%
-  #                mutate("genre" = tryCatch(
-  #                        {
-  #                          return(as.data.frame(filtered.data$primary_genres$music_genre_list)
-  #                                                $music_genre$music_genre_name[1])
-  #                        },
-  #                        error = function(e){
-  #                          return("Not found")
-  #                        })
-   #                     )
-  return(parsed.data)
+  return(
+        parsed.data %>%
+           mutate("genre" = genre)
+        )
 }

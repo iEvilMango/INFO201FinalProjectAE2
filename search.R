@@ -72,11 +72,14 @@ LyricCheckHelper <- function(name, add, rep="%20"){
 #   artist.name (optional): The name of the artist. (e.g. "Dire Straits"). If no artist is given, will use the top hit.
 # Returns:
 #   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
-GetLyrics <- function(song.name){
+GetLyrics <- function(song.name, song.artist){
   base = 'http://api.chartlyrics.com/apiv1.asmx/'
   search.lyric = paste0(base,'SearchLyric?')
   song = LyricCheckHelper(song.name,"song=")
-  artist.name <- GetSongData(song.name)$artist_name
+  artist.name = song.artist
+  if(song.artist == ""){
+    artist.name <- GetSongData(song.name)$artist_name
+  }
   artist = LyricCheckHelper(artist.name, "artist=")
   search <- paste0(search.lyric,artist,"&",song)
   print(search)

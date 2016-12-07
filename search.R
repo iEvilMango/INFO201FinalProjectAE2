@@ -1,6 +1,7 @@
 library(jsonlite)
 library(dplyr)
-require(XML)
+library(XML)
+library(curl)
 
 # Example requests:
 # data <- APIRequest("track", "Sultans of Swing", "Dire Straits")
@@ -193,6 +194,21 @@ GetSongData <- function(song.name, artist.name=""){
   return(filtered.data)
 }
 
+# Internal method for getting lyric data
+# Paramter:
+#   track.id: the musixmatch id of the track
+# Returns:
+#   Character array of the lyrics
+GetLyricsData <- function(track.id){
+  lyrics.search <- paste0("&track_id=",track.id)
+  lyric.data <- SendAPIRequest(
+                    "track.lyrics.get?",
+                    lyrics.search,
+                    1
+                  )
+  return(lyric.data$message$body$lyrics$lyrics_body)
+}
+
 # Gets the url for a youtube video from the keyword given
 # Parameter:
 #   video.search: the search query
@@ -209,8 +225,11 @@ GetYouTubeVideoID <- function(video.search){
   formatted.video.search = SwapSpaces(video.search)
   
   # Create API request url
-  search = paste0(base.url,"/search?part=snippet&q=",formatted.video.search,"&type=video&key=",api.key)
-  
+  search = paste0(base.url,
+                  "/search?part=snippet&q=",
+                  formatted.video.search,
+                  "&type=video&key=",
+                  api.key)
   # Make API request to get video data
   data <- fromJSON(search)
   
@@ -219,13 +238,6 @@ GetYouTubeVideoID <- function(video.search){
   
   return(video.id)
 }
-
-# Exampole url:
-# https://www.youtube.com/watch?v=G2tWhjEbfSQ
-# base = https://www.youtube.com/watch?
-# v= (Video equals)
-# G2tWhjEbfSQ video id
-
 
 # Takes a data frame created by the GetSongData function and returns a dataframe with
 # Released Date / Artist / Album Image URL / Popularity (from 0 - 100 in musixmatch) / Genre 
@@ -236,22 +248,16 @@ GetParsedData <- function(filtered.data){
                          album_coverart_100x100,
                          track_rating
                         ) 
+  
   genre = as.data.frame(filtered.data$primary_genres$music_genre_list)$music_genre$music_genre_name[1]
+  
+  # Error checking; if the obtained genre is meaningless, we can say it's not found.
   if(typeof(genre) != "character" || genre == "") {
     genre = "not found"
   }
-  parsed.data <- parsed.data %>%
-                  mutate("genre" = genre)
   
-  #%>%
-  #                mutate("genre" = tryCatch(
-  #                        {
-  #                          return(as.data.frame(filtered.data$primary_genres$music_genre_list)
-  #                                                $music_genre$music_genre_name[1])
-  #                        },
-  #                        error = function(e){
-  #                          return("Not found")
-  #                        })
-   #                     )
-  return(parsed.data)
+  return(
+        parsed.data %>%
+           mutate("genre" = genre)
+        )
 }

@@ -17,8 +17,29 @@ getYoutube <- function(youtubeID) {
   }
 }
 
+#list:
+# Alphabetic Aerobics by Blackalicious
+# Yellow by ColdPlay
+# The Sounds of Silence by Simon and Garfunkel
+# Mr Brightside by The Killers
+# Wheels on the Bus by Raffi -- missing lyrics but w/e
+# Sultans of Swing by Dire Straits
+titles <- c("Alphabet Aerobics",
+                    "Yellow",
+                    "The Sounds of Silence",
+                    "Mr Brightside",
+                    "Wheels on the Bus",
+                    "Sultan of Swings")
+artists <- c("Blackalicious",
+                     "ColdPlay",
+                     "Simon & Garfunkel",
+                     "The Killers",
+                     "Raffi",
+                     "Dire Straits")
+suggest <- data.frame(titles, artists)
+
 shinyServer(
-  function(input, output) {
+  function(input, output, session) {
     
     # returns a tag containing either a youtube video
     # associated with the given title and artist, or
@@ -36,6 +57,28 @@ shinyServer(
       )
     })
     
+    # The way this functions isn't ideal; it forces you to press
+    # submit, as submit buttons make all other input wait until it's pressed 
+    # see: 
+    # https://groups.google.com/forum/#!topic/shiny-discuss/NQHvTCW2t2A/discussion
+    observe({
+      # Whenever the input is the randomize button being pressed,
+      # randomly select a song from the suggest data frame,
+      # and change the values of the two inputs to `show` 
+      # song when you press submit twice.
+      if(input$randomize) {
+        choice <- suggest[sample(nrow(suggest), 1), ]
+        updateTextInput(session,
+                        inputId = "title", 
+                        value = as.character(choice$titles))
+        
+        updateTextInput(session,
+                        inputId = "artist", 
+                        value = as.character(choice$artists))
+      }
+    })
+      
+      
     # returns tag representing `meta data` section for the current song: 
     # If data cannot be found, shows that.
     # Otherwise, shows information on

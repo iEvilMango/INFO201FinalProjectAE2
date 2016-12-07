@@ -1,22 +1,30 @@
 library(shiny)
 source("search.R")
 
+# Given a youtube ID, returns a html tag representing either a youtube
+# video with the given ID, or paragraph tag saying the ID cannot be correlated
+# to a video
 getYoutube <- function(youtubeID) {
   if(youtubeID != "") {
-    link = paste0('<iframe width="500" height="250" src="//www.youtube.com/embed/',
-                  youtubeID,
-                  '" frameborder="0" allowfullscreen></iframe>')
+    return(tags$iframe(width="500",
+                       height="250",
+                       src = paste0('//www.youtube.com/embed/', youtubeID),
+                       frameborder="0"
+                      )
+          )
   } else {
-    link = "No Video passed"
+    return(tags$p("No video can be associated with the given title"))
   }
-  return(link);
 }
 
 shinyServer(
   function(input, output) {
+    
+    # returns a tag containing either a youtube video
+    # associated with the given title and artist, or
+    # a paragraph tag saying that won't work.
     output$youtube <- renderUI({
-      # Modify to get video id and pass that in.
-      HTML(
+      return(
         getYoutube(
           GetYouTubeVideoID(
             paste0(
@@ -28,9 +36,18 @@ shinyServer(
       )
     })
     
+    # returns tag representing `meta data` section for the current song: 
+    # If data cannot be found, shows that.
+    # Otherwise, shows information on
+    # Release date
+    # Artist
+    # Genre
+    # Popularity rating (taken from musixmatch)
     output$meta <- renderUI({
       output <- tags$div()
       
+      # Get data from resources on the given song if possible;
+      # if not, handle the error.
       data <- GetSongData(input$title, input$artist)
       if(typeof(data) == "NULL") { 
         return(tagAppendChild(output,
@@ -38,58 +55,81 @@ shinyServer(
       }
       data <- GetParsedData(data)
       
-      first.release <- data$first_release_date
-      first.release <- format(as.Date(first.release), format="%B %d, %Y")
+      # Get data regarding when the song was first released.
+      first.release <- as.Date(data$first_release_date) %>%
+                            format(format="%B %d, %Y")
       
       date <- tags$p(
                 paste0("Released: ", first.release)
               )
-      
-      genre <- data$genre
-      
-      artist <- data$artist_name
-      popularity <- data$track_rating
     
+      # Add date to the output
       output <- tagAppendChild(output, date)
       
+      # Gather data about artist, add to output
       output <- tagAppendChild(output, 
                       tags$p(
-                        paste("Artist:", artist)
+                        paste("Artist:", data$artist_name)
                       )
                     )
       
+      # Gather data about genre, add to output
       output <- tagAppendChild(output, 
                                 tags$p(
-                                  paste("Genre:", genre)
+                                  paste("Genre:", data$genre)
                                 )
                              )
       
+      # Gather data about track_rating, add to output
       output <- tagAppendChild(output, 
                                 tags$p(
-                                  paste("Popularity rating (out of 100):", popularity)
+                                  paste("Popularity rating (out of 100):", 
+                                        data$track_rating)
                                 )
                               )
       return(output)
     })
     
-    
+    # Attempts to generate lyrics for the current song in
+    # a single blockquote
+    # if the current song's lyrics cannot be found, returns
+    # the blockquote with only a paragraph explaining that inside of it.
+    # otherwise, the blockquote will contain the lyrics to the song,
+    # split by line and visually broken apart by br tags
     output$lyrics <- renderUI({
       block <- tags$blockquote()
-      lyrics <- NULL;
-      tryCatch({
-        lyrics <- GetLyrics(input$title, input$artist) %>%
+      lyrics <- NULL
+      
+      # try to get lyrics if possible...
+      tryCatch(
+        {
+          lyrics <- GetLyrics(input$title, input$artist) %>%
                       strsplit("\n")
-      },  error = function(cond) {
-        lyrics <- NULL;
-      })
+        },  
+        error = function(cond)
+        {
+          lyrics <- NULL
+        }
+      )
+      
+      # error check; if no lyrics have been found, handle that.
       if(is.null(lyrics)) {
         return(tagAppendChild(block, tags$p("Lyrics not found")))
       }
+      
+      # For every line in lyrics
       for (i in lyrics[[1]]) {
+        # add it to the output, along with a br tag to skip to the next line.
         block <- block %>%
                   tagAppendChild(i) %>%
                   tagAppendChild(tags$br())
       }
+      block <- block %>% 
+                tagAppendChild(tags$br()) %>%
+                tagAppendChild(tags$br()) %>%
+                tagAppendChild(
+                  tags$p("Courtesy of ChartLyrics -- if incorrect, pass that on to us on our github!"))
+      
       return(block)
     })
   } ## End of server function

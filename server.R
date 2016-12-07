@@ -29,15 +29,21 @@ shinyServer(
     })
     
     output$meta <- renderUI({
-      # Genre 
       output <- tags$div()
-      data <- GetParsedData(
-        GetSongData(input$title, input$artist)
-      )
+      
+      data <- GetSongData(input$title, input$artist)
+      if(typeof(data) == "NULL") { 
+        return(tagAppendChild(output,
+                              tags$p("Song meta data not found")))
+      }
+      data <- GetParsedData(data)
+      
       first.release <- data$first_release_date
       first.release <- format(as.Date(first.release), format="%B %d, %Y")
       
-      date <- tags$p(paste0("Released: ", first.release))
+      date <- tags$p(
+                paste0("Released: ", first.release)
+              )
       
       genre <- data$genre
       
@@ -68,15 +74,21 @@ shinyServer(
     
     
     output$lyrics <- renderUI({
-      
-      lyrics <- GetLyrics(input$title, input$artist)
-      
-      lyrics <- strsplit(lyrics, "\n")
       block <- tags$blockquote()
-      
+      lyrics <- NULL;
+      tryCatch({
+        lyrics <- GetLyrics(input$title, input$artist) %>%
+                      strsplit("\n")
+      },  error = function(cond) {
+        lyrics <- NULL;
+      })
+      if(is.null(lyrics)) {
+        return(tagAppendChild(block, tags$p("Lyrics not found")))
+      }
       for (i in lyrics[[1]]) {
-        block <- tagAppendChild(block, i)
-        block <- tagAppendChild(block, tags$br())
+        block <- block %>%
+                  tagAppendChild(i) %>%
+                  tagAppendChild(tags$br())
       }
       return(block)
     })

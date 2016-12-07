@@ -1,6 +1,7 @@
 library(jsonlite)
 library(dplyr)
-require(XML)
+library(XML)
+library(curl)
 
 # Example requests:
 # data <- APIRequest("track", "Sultans of Swing", "Dire Straits")

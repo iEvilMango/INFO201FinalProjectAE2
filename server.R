@@ -1,6 +1,3 @@
-## TO FIX::
-# character ambiguity with meta data for song `The Scientist` by Coldplay
-
 library(shiny)
 source("search.R")
 
@@ -28,7 +25,9 @@ titles <- c("Alphabet Aerobics", # handling genre not found.
             "Sultans of Swing",
             "Grand Theft Autumn",
             "The I In Lie", # handling lyric not found
-            "Alphabet Aerobics") #handling all the issues, nothing found.
+            "Alphabet Aerobics",  # handling all the issues, nothing found.
+            "The Scientist" # Handling date not found for metadata
+            ) 
 artists <- c("Blackalicious",
              "ColdPlay",
              "Simon & Garfunkel",
@@ -37,7 +36,9 @@ artists <- c("Blackalicious",
              "Dire Straits",
              "Fall Out Boy",
              "Patrick Stump",
-             "Dire Straits")
+             "Dire Straits",
+             "ColdPlay"
+             )
 suggest <- data.frame(titles, artists)
 
 shinyServer(
@@ -99,39 +100,32 @@ shinyServer(
                               tags$p("Song meta data not found")))
       }
       data <- GetParsedData(data)
+      tryCatch({
+        # Get data regarding when the song was first released.
+        first.release <- as.Date(data$first_release_date) %>%
+                              format(format="%B %d, %Y")
+        
+        date <- tags$p(
+                  paste0("Released: ", first.release)
+                )
       
-      # Get data regarding when the song was first released.
-      first.release <- as.Date(data$first_release_date) %>%
-                            format(format="%B %d, %Y")
-      
-      date <- tags$p(
-                paste0("Released: ", first.release)
-              )
-    
-      # Add date to the output
-      output <- tagAppendChild(output, date)
-      
-      # Gather data about artist, add to output
-      output <- tagAppendChild(output, 
-                      tags$p(
-                        paste("Artist:", data$artist_name)
-                      )
-                    )
-      
-      # Gather data about genre, add to output
-      output <- tagAppendChild(output, 
-                                tags$p(
-                                  paste("Genre:", data$genre)
-                                )
-                             )
-      
-      # Gather data about track_rating, add to output
-      output <- tagAppendChild(output, 
-                                tags$p(
-                                  paste("Popularity rating (out of 100):", 
-                                        data$track_rating)
-                                )
-                              )
+        # Add date to the output
+        output <- tagAppendChild(output, date)
+      }, error = function(e) {} ## In that case, just ignore the date.
+      )
+      # Add information regarding the artist, the genre, and the popularity
+      # of the song
+      output <- output %>% 
+                  tagAppendChild(tags$p(
+                    paste("Artist:", data$artist_name))
+                  ) %>%
+                  tagAppendChild(tags$p(
+                    paste("Genre:", data$genre))
+                  ) %>%
+                  tagAppendChild(tags$p(
+                    paste("Popularity rating (out of 100):", 
+                          data$track_rating))
+                  )
       return(output)
     })
     

@@ -66,11 +66,12 @@ shinyServer(
       return(output)
     })
     
+    
     output$lyrics <- renderUI({
       
       lyrics <- GetLyrics(input$title, input$artist)
       
-      lyrics = strsplit(lyrics, "\n")
+      lyrics <- strsplit(lyrics, "\n")
       block <- tags$blockquote()
       
       for (i in lyrics[[1]]) {

@@ -2,10 +2,12 @@
 # UI file for interacting with the user and displaying data.
 
 library(shiny)
+library(shinythemes)
 
 # Start up the shinyUI, making a fluid page
 shinyUI(
-  fluidPage(
+  fluidPage(theme = shinytheme("superhero"),
+    headerPanel(title = "Quick song info", windowTitle = "Quick song info"),
     # Left panel with query controls
     sidebarPanel(
       # Disable this one on final product. Or leave it enabled and do cool stuff.
@@ -14,9 +16,8 @@ shinyUI(
       #          label = "Youtube link",
       #          value = "bbPaI_OQBUA"
       #          ),
-      
       textInput(inputId = 'title',
-                   label = "Title of Song",
+                   label = "Title of Song (Required)",
                 value = "Alphabet Aerobics"
                    ),
       

@@ -1,3 +1,6 @@
+## TO FIX::
+# character ambiguity with meta data for song `The Scientist` by Coldplay
+
 library(shiny)
 source("search.R")
 
@@ -17,13 +20,6 @@ getYoutube <- function(youtubeID) {
   }
 }
 
-#list:
-# Alphabetic Aerobics by Blackalicious
-# Yellow by ColdPlay
-# The Sounds of Silence by Simon and Garfunkel
-# Mr Brightside by The Killers
-# Wheels on the Bus by Raffi -- missing lyrics but w/e
-# Sultans of Swing by Dire Straits
 titles <- c("Alphabet Aerobics", # handling genre not found.
             "Yellow",
             "The Sounds of Silence",
@@ -157,6 +153,7 @@ shinyServer(
         },  
         error = function(cond)
         {
+          # returning here is useless as it' just breaks the tryCatch
           lyrics <- NULL
         }
       )

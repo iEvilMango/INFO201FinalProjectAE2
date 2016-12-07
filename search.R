@@ -139,15 +139,23 @@ GetParsedData <- function(filtered.data){
                          artist_name,
                          album_coverart_100x100,
                          track_rating
-                        ) %>%
-                  mutate("genre" = tryCatch(
-                          {
-                            return(as.data.frame(filtered.data$primary_genres$music_genre_list)
-                                                  $music_genre$music_genre_name[1])
-                          },
-                          error = function(e){
-                            return("Not found")
-                          })
-                        )
+                        ) 
+  genre = as.data.frame(filtered.data$primary_genres$music_genre_list)$music_genre$music_genre_name[1]
+  if(typeof(genre) != "character" || genre == "") {
+    genre = "not found"
+  }
+  parsed.data <- parsed.data %>%
+                  mutate("genre" = genre)
+  
+  #%>%
+  #                mutate("genre" = tryCatch(
+  #                        {
+  #                          return(as.data.frame(filtered.data$primary_genres$music_genre_list)
+  #                                                $music_genre$music_genre_name[1])
+  #                        },
+  #                        error = function(e){
+  #                          return("Not found")
+  #                        })
+   #                     )
   return(parsed.data)
 }

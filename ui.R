@@ -16,7 +16,8 @@ shinyUI(
       #          ),
       
       textInput(inputId = 'title',
-                   label = "Title of Song"
+                   label = "Title of Song",
+                value = "Alphabet Aerobics"
                    ),
       
       textInput(inputId = 'artist',

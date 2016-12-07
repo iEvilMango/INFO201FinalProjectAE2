@@ -39,6 +39,7 @@ shinyUI(
     sidebarPanel(
       uiOutput("meta"),
       width = 3,
+      
       # link to GH
       tags$p(
         tags$a(

@@ -5,7 +5,7 @@ source("search.R")
 # video with the given ID, or paragraph tag saying the ID cannot be correlated
 # to a video
 getYoutube <- function(youtubeID) {
-  if(youtubeID != "") {
+  if(!is.null(youtubeID)) {
     return(tags$iframe(width="500",
                        height="250",
                        src = paste0('//www.youtube.com/embed/', youtubeID),
@@ -24,18 +24,24 @@ getYoutube <- function(youtubeID) {
 # Mr Brightside by The Killers
 # Wheels on the Bus by Raffi -- missing lyrics but w/e
 # Sultans of Swing by Dire Straits
-titles <- c("Alphabet Aerobics",
-                    "Yellow",
-                    "The Sounds of Silence",
-                    "Mr Brightside",
-                    "Wheels on the Bus",
-                    "Sultan of Swings")
+titles <- c("Alphabet Aerobics", # handling genre not found.
+            "Yellow",
+            "The Sounds of Silence",
+            "Mr Brightside",
+            "Wheels on the Bus", # handling lyric not found
+            "Sultans of Swing",
+            "Grand Theft Autumn",
+            "The I In Lie", # handling lyric not found
+            "Alphabet Aerobics") #handling all the issues, nothing found.
 artists <- c("Blackalicious",
-                     "ColdPlay",
-                     "Simon & Garfunkel",
-                     "The Killers",
-                     "Raffi",
-                     "Dire Straits")
+             "ColdPlay",
+             "Simon & Garfunkel",
+             "The Killers",
+             "Raffi",
+             "Dire Straits",
+             "Fall Out Boy",
+             "Patrick Stump",
+             "Dire Straits")
 suggest <- data.frame(titles, artists)
 
 shinyServer(

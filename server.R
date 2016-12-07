@@ -1,4 +1,5 @@
 library(shiny)
+library(shinythemes)
 source("search.R")
 
 # Given a youtube ID, returns a html tag representing either a youtube

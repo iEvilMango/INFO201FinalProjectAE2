@@ -1,6 +1,6 @@
 library(jsonlite)
 library(dplyr)
-require(curl)
+require(XML)
 
 # Example requests:
 # data <- APIRequest("track", "Sultans of Swing", "Dire Straits")
@@ -18,8 +18,8 @@ require(curl)
 #
 
 # Helper function to replace spaces with '%20'
-SwapSpaces <- function(str){
-  return(gsub(" ","%20",str))
+SwapSpaces <- function(str, rep="%20"){
+  return(gsub(" ",rep,str))
 }
 
 # Method that sends the actual API request
@@ -59,10 +59,10 @@ APIRequest <- function(query.type, song.name, artist.name, num.results=1){
 # Internal method for reducing redundancy.
 # Checks if the given name is an empty string. If it is not empty, formats it and appends the given add to it.
 # If name is equal to "", returns ""
-LyricCheckHelper <- function(name, add){
+LyricCheckHelper <- function(name, add, rep="%20"){
   name.part = ""
   if(name != ""){
-    formatted = SwapSpaces(name)
+    formatted = SwapSpaces(name, rep)
     name.part <- paste0(add,formatted)
   }
   return(name.part)
@@ -76,10 +76,36 @@ LyricCheckHelper <- function(name, add){
 #   artist.name (optional): The name of the artist. (e.g. "Dire Straits"). If no artist is given, will use the top hit.
 # Returns:
 #   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
-GetLyrics <- function(song.name, artist.name=""){
-  data <- GetSongData(song.name, artist.name)
-  track.id <-  data$message$body$track_list$track$track_id
-  return(GetLyricsData(track.id))
+GetLyrics <- function(song.name){
+  base = 'http://api.chartlyrics.com/apiv1.asmx/'
+  search.lyric = paste0(base,'SearchLyric?')
+  song = LyricCheckHelper(song.name,"song=")
+  artist.name <- GetSongData(song.name)$artist_name
+  artist = LyricCheckHelper(artist.name, "artist=")
+  search <- paste0(search.lyric,artist,"&",song)
+  print(search)
+  data <- xmlToList(xmlTreeParse(search))
+  lyric.id = data$SearchLyricResult$LyricId
+  checksum  = data$SearchLyricResult$LyricChecksum
+  search.words = paste0(base,"GetLyric?")
+  search.id = LyricCheckHelper(lyric.id, "lyricId=")
+  search.sum = LyricCheckHelper(checksum, "lyricCheckSum=")
+  full.search = paste0(search.words,search.id,"&",search.sum)
+  print(full.search)
+  full.lyrics = xmlToList(xmlTreeParse(full.search))
+  return(full.lyrics$Lyric)
+}
+
+LyricHelperInternal <- function(song.name){
+  base = 'http://api.chartlyrics.com/apiv1.asmx/'
+  search.lyric = paste0(base,'SearchLyric?')
+  song = LyricCheckHelper(song.name,"song=")
+  artist.name <- GetSongData(song.name)$artist_name
+  artist = LyricCheckHelper(artist.name, "artist=")
+  search <- paste0(search.lyric,artist,"&",song)
+  print(search)
+  data <- xmlToList(xmlTreeParse(search))
+  return(data)
 }
 
 # Internal method for getting song data

@@ -19,15 +19,21 @@ getYoutube <- function(youtubeID) {
 
 titles <- c("Alphabet Aerobics", # handling genre not found.
             "Yellow",
-            "The Sounds of Silence",
+            "The Sounds of Silence", # handles '&quot;'-> '"' in lyrics
             "Mr Brightside",
             "Wheels on the Bus", # handling lyric not found
             "Sultans of Swing",
             "Grand Theft Autumn",
             "The I In Lie", # handling lyric not found
             "Alphabet Aerobics",  # handling all the issues, nothing found.
-            "The Scientist" # Handling date not found for metadata
-            ) 
+            "The Scientist", # Handling date not found for metadata
+            "Fairly Local",
+            # The next one is mostly right besides the lyrics; chart lyrics
+            # tries to do a partial match and it gets the wrong song because
+            # they don't have info on this song. Too bad.
+            "Tear in my Heart",
+            "Nine in the Afternoon" # It can still match pretty accurately with just title.
+            )         
 artists <- c("Blackalicious",
              "ColdPlay",
              "Simon & Garfunkel",
@@ -37,7 +43,10 @@ artists <- c("Blackalicious",
              "Fall Out Boy",
              "Patrick Stump",
              "Dire Straits",
-             "ColdPlay"
+             "ColdPlay",
+             "twenty one pilots",
+             "twenty one pilots",
+             ""
              )
 suggest <- data.frame(titles, artists)
 
@@ -161,7 +170,7 @@ shinyServer(
       for (i in lyrics[[1]]) {
         # add it to the output, along with a br tag to skip to the next line.
         block <- block %>%
-                  tagAppendChild(i) %>%
+                  tagAppendChild(gsub("&quot;", '"', i)) %>% # Convert quotation marks
                   tagAppendChild(tags$br())
       }
       block <- block %>% 

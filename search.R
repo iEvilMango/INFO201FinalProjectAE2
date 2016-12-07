@@ -12,10 +12,6 @@ require(curl)
 # data <- APIRequest("track", "Sultans of Swing", "")
 #   Gets the top 10 results of the  track "Sultans of Swing"
 #
-# 
-# 
-# 
-#
 
 # Helper function to replace spaces with '%20'
 SwapSpaces <- function(str){
@@ -78,7 +74,7 @@ LyricCheckHelper <- function(name, add){
 #   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
 GetLyrics <- function(song.name, artist.name=""){
   data <- GetSongData(song.name, artist.name)
-  track.id <-  data$message$body$track_list$track$track_id
+  track.id <-  data$track_id
   return(GetLyricsData(track.id))
 }
 
@@ -143,14 +139,23 @@ GetParsedData <- function(filtered.data){
                          artist_name,
                          album_coverart_100x100,
                          track_rating
-                        ) %>%
-                  mutate("genre" = as.data.frame(filtered.data$primary_genres$music_genre_list)
-                                                $music_genre$music_genre_name)
+                        ) 
+  genre = as.data.frame(filtered.data$primary_genres$music_genre_list)$music_genre$music_genre_name[1]
+  if(typeof(genre) != "character" || genre == "") {
+    genre = "not found"
+  }
+  parsed.data <- parsed.data %>%
+                  mutate("genre" = genre)
+  
+  #%>%
+  #                mutate("genre" = tryCatch(
+  #                        {
+  #                          return(as.data.frame(filtered.data$primary_genres$music_genre_list)
+  #                                                $music_genre$music_genre_name[1])
+  #                        },
+  #                        error = function(e){
+  #                          return("Not found")
+  #                        })
+   #                     )
   return(parsed.data)
 }
-
-
-
-
-
-

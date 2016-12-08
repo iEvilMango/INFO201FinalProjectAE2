@@ -78,7 +78,7 @@ LyricCheckHelper <- function(name, add){
 #   Character array of the lyrics, with escape characters (/n, etc.) included. Also has the necessary copyright information at the end.
 GetLyrics <- function(song.name, artist.name=""){
   data <- GetSongData(song.name, artist.name)
-  track.id <-  data$message$body$track_list$track$track_id
+  track.id <-  data$track_id
   return(GetLyricsData(track.id))
 }
 
@@ -145,7 +145,7 @@ GetParsedData <- function(filtered.data){
                          track_rating
                         ) %>%
                   mutate("genre" = as.data.frame(filtered.data$primary_genres$music_genre_list)
-                                                $music_genre$music_genre_name)
+                                                $music_genre$music_genre_name[1])
   return(parsed.data)
 }
 
